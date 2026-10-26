@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Save My PhD Application!</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #252640;
+    font-family: Arial, sans-serif;
+}
+
+.game {
+    width: 100%;
+    max-width: 1000px;
+
+    background: #fff8ee;
+    border-radius: 22px;
+    overflow: hidden;
+
+    box-shadow: 0 12px 45px #0005;
+}
+
+header {
+    padding: 22px;
+    text-align: center;
+}
+
+h1 {
+    margin: 0;
+    color: #53486d;
+    font-size: clamp(22px, 4vw, 34px);
+}
+
+.subtitle {
+    color: #857990;
+    font-size: 14px;
+}
+
+.scene {
+    width: 100%;
+    padding: 12px;
+    text-align: center;
+}
+
+canvas {
+    display: block;
+
+    width: auto;
+    max-width: 100%;
+    max-height: 420px;
+
+    height: auto;
+
+    margin: 0 auto;
+
+    object-fit: contain;
+
+    border-radius: 14px;
+}
+
+.dialogue {
+    margin: 12px 20px;
+    padding: 18px;
+
+    background: white;
+    border: 2px solid #e9d5b9;
+    border-radius: 16px;
+
+    text-align: center;
+    font-size: 17px;
+    line-height: 1.6;
+    color: #51465c;
+}
+
+.progress-area {
+    margin: 20px;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+
+    font-weight: bold;
+    color: #51465c;
+    margin-bottom: 8px;
+}
+
+.progress-background {
+    height: 17px;
+    background: #e5dce9;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.progress {
+    width: 90%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        #8881d5,
+        #b6a6eb
+    );
+    transition: width 0.7s;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+
+    gap: 15px;
+    padding: 15px 20px 25px;
+}
+
+button {
+    padding: 15px 25px;
+    min-height: 48px;
+
+    border-radius: 14px;
+    border: 2px solid #a79abb;
+
+    font-size: 16px;
+    font-weight: bold;
+
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+.yes {
+    background: #ffe29a;
+    color: #624b35;
+}
+
+.no {
+    background: #c8c2ee;
+    color: #4d466d;
+}
+
+.restart {
+    background: #eee8f5;
+    color: #64538e;
+}
+
+.achievement {
+    display: none;
+    text-align: center;
+
+    margin: 10px 20px 20px;
+    padding: 20px;
+
+    background: #fff0c4;
+    border: 2px solid #e7c994;
+    border-radius: 16px;
+
+    color: #604b31;
+}
+
+footer {
+    text-align: center;
+    font-size: 12px;
+    color: #9b8fa6;
+    padding: 15px;
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 8px;
+    }
+
+    .scene {
+        padding: 6px;
+    }
+
+    .dialogue {
+        margin: 10px;
+        font-size: 15px;
+    }
+
+    .buttons {
+        gap: 10px;
+    }
+
+    button {
+        width: 100%;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+<header>
+    <h1>Save My PhD Application!</h1>
+    <p class="subtitle">
+        A tiny academic adventure
+    </p>
+</header>
+
+<div class="scene">
+    <canvas id="sceneCanvas"></canvas>
+</div>
+
+<div class="dialogue" id="dialogue">
+
+    <strong>Dear Mentor,</strong>
+    <br><br>
+
+    My PhD application is almost complete,
+    but I'm missing one very important letter...
+
+    <br><br>
+
+    Would you help me with my recommendation letter?
+
+</div>
+
+<div class="progress-area">
+
+    <div class="progress-label">
+        <span>Application Progress</span>
+        <span id="percentage">90%</span>
+    </div>
+
+    <div class="progress-background">
+        <div class="progress" id="progress"></div>
+    </div>
+
+</div>
+
+<div class="buttons" id="buttons">
+
+    <button class="yes" onclick="accept()">
+        Of course! I'll help!
+    </button>
+
+    <button class="no" onclick="reject()">
+        Maybe later...
+    </button>
+
+</div>
+
+<div class="achievement" id="achievement">
+
+    <h2>Achievement Unlocked!</h2>
+
+    <h3>The Power of Recommendation</h3>
+
+    <p>+100 PhD Application Luck</p>
+
+    <p>
+        Thank you for supporting my academic journey!
+    </p>
+
+    <p>
+        Now I'm just waiting for the actual letter...
+    </p>
+
+</div>
+
+<footer>
+    Made with gratitude and a tiny bit of academic desperation.
+    <br><br>
+    Unofficial, non-commercial Honkai: Star Rail fan creation.
+    <br>
+    Honkai: Star Rail and its characters are the property
+    of their respective rights holders.
+    <br>
+    Not affiliated with or endorsed by HoYoverse.
+</footer>
+
+
+</div>
+
+<script>
+
+// ---------------------------------
+// Load original illustration
+// ---------------------------------
+
+const image = new Image();
+
+image.src = "design.png";
+
+const canvas = document.getElementById("sceneCanvas");
+const ctx = canvas.getContext("2d");
+
+let rejectionCount = 0;
+let completed = false;
+let currentScene = "normal";
+
+// Original illustration dimensions:
+// 1536 x 1024
+//
+// Each scene is cropped from the
+// corresponding part of the image.
+
+const scenes = {
+    normal: {
+        x: 0,
+        y: 0,
+        w: 1536,
+        h: 510
+    },
+
+    sad: {
+        x: 0,
+        y: 510,
+        w: 315,
+        h: 514
+    },
+
+    cry: {
+        x: 325,
+        y: 510,
+        w: 300,
+        h: 514
+    },
+
+    bat: {
+        x: 635,
+        y: 510,
+        w: 300,
+        h: 514
+    },
+
+    acceptFate: {
+        x: 945,
+        y: 510,
+        w: 270,
+        h: 514
+    },
+
+    happy: {
+        x: 1225,
+        y: 510,
+        w: 311,
+        h: 514
+    }
+};
+
+
+// ---------------------------------
+// Render image
+// ---------------------------------
+
+function drawScene(name) {
+
+    currentScene = name;
+
+    if (!image.complete || !image.naturalWidth) {
+        return;
+    }
+
+    const s = scenes[name];
+
+    // Scale source coordinates to the
+    // actual resolution of the image.
+
+    const scaleX = image.naturalWidth / 1536;
+    const scaleY = image.naturalHeight / 1024;
+
+    const sx = s.x * scaleX;
+    const sy = s.y * scaleY;
+    const sw = s.w * scaleX;
+    const sh = s.h * scaleY;
+
+    // Use the original aspect ratio.
+    // CSS scales the canvas responsively.
+
+    canvas.width = Math.round(sw);
+    canvas.height = Math.round(sh);
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    ctx.drawImage(
+        image,
+        sx,
+        sy,
+        sw,
+        sh,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+}
+
+image.onload = function() {
+    drawScene(currentScene);
+};
+
+image.onerror = function() {
+    document.getElementById("dialogue").textContent =
+        "Image not found. Please place design.png next to index.html.";
+};
+
+
+// ---------------------------------
+// Accept recommendation
+// ---------------------------------
+
+function accept() {
+
+    completed = true;
+
+    drawScene("happy");
+
+    document.getElementById("dialogue").innerHTML = `
+        <strong>THANK YOU SO MUCH!</strong>
+        <br><br>
+        You just made this little raccoon
+        the happiest PhD applicant in the galaxy!
+        <br><br>
+        One step closer to my PhD!
+    `;
+
+    document.getElementById("progress").style.width = "99%";
+
+    document.getElementById("percentage").textContent = "99%";
+
+    document.getElementById("achievement").style.display = "block";
+
+    document.getElementById("buttons").innerHTML = `
+        <button class="restart" onclick="restart()">
+            Play Again
+        </button>
+    `;
+
+}
+
+
+// ---------------------------------
+// Reject recommendation
+// ---------------------------------
+function reject() {
+
+    if (completed) return;
+
+    rejectionCount++;
+
+    const dialogue = document.getElementById("dialogue");
+
+    if (rejectionCount === 1) {
+
+        drawScene("sad");
+
+        dialogue.innerHTML = `
+            Oh... it's okay...
+            <br><br>
+            Maybe you're just busy...
+            <br><br>
+            Would you reconsider?
+        `;
+
+    }
+
+    else if (rejectionCount === 2) {
+
+        drawScene("cry");
+
+        dialogue.innerHTML = `
+            <strong>Emotional Damage: 999</strong>
+            <br><br>
+            Even the Astral Express cannot carry
+            this much sadness...
+        `;
+
+    }
+
+    else if (rejectionCount === 3) {
+
+        drawScene("bat");
+
+        dialogue.innerHTML = `
+            <strong>RULES ARE MADE TO BE BROKEN!</strong>
+            <br><br>
+            ...
+            <br><br>
+            Just kidding.
+            <br><br>
+            I still really hope you can help me.
+        `;
+
+    }
+
+    else {
+
+        drawScene("acceptFate");
+
+        dialogue.innerHTML = `
+            Okay...
+            <br><br>
+            Then I'll reluctantly accept this fate...
+            <br><br>
+            But I'll still be a little sad...
+        `;
+
+    }
+
+    document.getElementById("buttons").innerHTML = `
+        <button class="yes" onclick="accept()">
+            Actually, I'll help!
+        </button>
+
+        <button class="no" onclick="reject()">
+            Still no...
+        </button>
+    `;
+}
+// ---------------------------------
+// Restart game
+// ---------------------------------
+
+function restart() {
+
+    rejectionCount = 0;
+    completed = false;
+
+    drawScene("normal");
+
+    document.getElementById("dialogue").innerHTML = `
+        <strong>Dear Mentor,</strong>
+        <br><br>
+        My PhD application is almost complete,
+        but I'm missing one very important letter...
+        <br><br>
+        Would you help me with my recommendation letter?
+    `;
+
+    document.getElementById("progress").style.width = "90%";
+
+    document.getElementById("percentage").textContent = "90%";
+
+    document.getElementById("achievement").style.display = "none";
+
+    document.getElementById("buttons").innerHTML = `
+        <button class="yes" onclick="accept()">
+            Of course! I'll help!
+        </button>
+
+        <button class="no" onclick="reject()">
+            Maybe later...
+        </button>
+    `;
+
+}
+
+</script>
+
+</body>
+</html>
