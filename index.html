@@ -298,7 +298,41 @@ footer {
 </div>
 
 <script>
+const SUPABASE_URL = "https://oizhvehhdlvbirweazio.supabase.co";
+const SUPABASE_KEY = "sb_publishable_ngCzdmDGuBj_cFbp3Pc8MA_PlBKnuOs";
 
+let sessionId = crypto.randomUUID();
+let eventQueue = Promise.resolve();
+
+function trackEvent(eventType, step = 0) {
+
+    const eventSessionId = sessionId;
+
+    eventQueue = eventQueue.then(async () => {
+        const response = await fetch(
+            `${SUPABASE_URL}/rest/v1/game_events`,
+            {
+                method: "POST",
+                headers: {
+                    "apikey": SUPABASE_KEY,
+                    "Content-Type": "application/json",
+                    "Prefer": "return=minimal"
+                },
+                body: JSON.stringify({
+                    session_id: eventSessionId,
+                    event_type: eventType,
+                    step: step
+                })
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`Tracking failed: ${response.status}`);
+        }
+    }).catch(console.error);
+}
+
+trackEvent("game_opened");
 // ---------------------------------
 // Load original illustration
 // ---------------------------------
@@ -456,8 +490,9 @@ function accept() {
         <button class="restart" onclick="restart()">
             Play Again
         </button>
-    `;
-
+    `
+;
+    trackEvent("accepted", rejectionCount);
 }
 
 
@@ -469,6 +504,8 @@ function reject() {
     if (completed) return;
 
     rejectionCount++;
+
+    trackEvent("rejected", rejectionCount);
 
     const dialogue = document.getElementById("dialogue");
 
@@ -545,6 +582,13 @@ function reject() {
 
 function restart() {
 
+    
+    trackEvent("restarted");
+
+    sessionId = crypto.randomUUID();
+
+    trackEvent("game_opened");
+    
     rejectionCount = 0;
     completed = false;
 
